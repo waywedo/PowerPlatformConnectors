@@ -50,6 +50,7 @@
                             "properties": {
                                 "instanceId": {
                                     "type": "string",
+                                    "format": "guid",
                                     "description": "Select the checklist instance",
                                     "x-ms-summary": "Checklist Instance ID",
                                     "x-ms-visibility": "important",
@@ -62,6 +63,7 @@
                                 },
                                 "stepId": {
                                     "type": "string",
+                                    "format": "guid",
                                     "description": "Select the step of the checklist instance",
                                     "x-ms-summary": "Step ID",
                                     "x-ms-visibility": "important",
@@ -116,8 +118,7 @@
                                 "bot",
                                 "instanceId",
                                 "message",
-                                "stepId",
-                                "userId"
+                                "stepId"
                             ]
                         },
                         "x-ms-visibility": "important"
@@ -226,13 +227,25 @@
                                 "userId": {
                                     "type": "integer",
                                     "format": "int32",
-                                    "description": "Select the user creating the instance",
+                                    "description": "Select the user to add as a collaborator",
                                     "x-ms-summary": "User ID",
                                     "x-ms-visibility": "important",
                                     "x-ms-dynamic-values": {
                                         "operationId": "Find_User",
                                         "value-path": "id",
                                         "value-title": "email"
+                                    }
+                                },
+                                "companyRoleId": {
+                                    "type": "integer",
+                                    "format": "int32",
+                                    "description": "Select the company role to add as a collaborator.",
+                                    "x-ms-summary": "Company Role ID",
+                                    "x-ms-visibility": "important",
+                                    "x-ms-dynamic-values": {
+                                        "operationId": "CompanyRoles_GetAll",
+                                        "value-path": "id",
+                                        "value-title": "title"
                                     }
                                 },
                                 "bot": {
@@ -246,8 +259,7 @@
                             "required": [
                                 "bot",
                                 "procedureId",
-                                "title",
-                                "userId"
+                                "title"
                             ]
                         }
                     }
@@ -531,6 +543,82 @@
                     "200": {
                         "description": "Checklist Step Completed",
                         "schema": {}
+                    }
+                }
+            }
+        },
+        "/v1/Collaborators": {
+            "post": {
+                "tags": ["Checklist Instance Collaborators"],
+                "operationId": "Collaborators_Add",
+                "summary": "Add Collaborators to a Checklist Instance",
+                "description": "Adds one or more collaborators to a checklist instance.",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "name": "AddCollaboratorsRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "checklistInstanceId": {
+                                    "type": "string",
+                                    "description": "Select the checklist instance",
+                                    "x-ms-summary": "Checklist Instance ID",
+                                    "x-ms-visibility": "important",
+                                    "x-ms-dynamic-values": {
+                                        "operationId": "GetAll_ChecklistInstances",
+                                        "value-path": "id",
+                                        "value-collection": "results",
+                                        "value-title": "title"
+                                    }
+                                },
+                                "userIds": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "description": "Select the users to add as collaborators",
+                                        "x-ms-summary": "User IDs",
+                                        "x-ms-visibility": "important",
+                                        "x-ms-dynamic-values": {
+                                            "operationId": "Find_User",
+                                            "value-path": "id",
+                                            "value-title": "email"
+                                        }
+                                    }
+                                },
+                                "companyRoleIds": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "description": "Select the company roles to add as collaborators.",
+                                        "x-ms-summary": "Company Role IDs",
+                                        "x-ms-visibility": "important",
+                                        "x-ms-dynamic-values": {
+                                            "operationId": "CompanyRoles_GetAll",
+                                            "value-path": "id",
+                                            "value-title": "title"
+                                        }
+                                    }
+                                }
+                            },
+                            "required": [
+                                "checklistInstanceId"
+                            ]
+                        },
+                        "x-ms-visibility": "important"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Collaborators added",
+                        "schema": {
+                            "type": "object",
+                            "properties": {}
+                        }
                     }
                 }
             }
@@ -1280,6 +1368,20 @@
                     "description": "The date and time the checklist instance was finished.",
                     "x-ms-summary": "Instance Finish Date",
                     "x-ms-visibility": "advanced"
+                },
+                "earliestDue": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The earliest date and time the checklist instance could be due.",
+                    "x-ms-summary": "Instance Earliest Due Date",
+                    "x-ms-visibility": "important"
+                },
+                "latestDue": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The latest date and time the checklist instance could be due.",
+                    "x-ms-summary": "Instance Latest Due Date",
+                    "x-ms-visibility": "important"
                 }
             }
         },
@@ -1340,6 +1442,13 @@
                     "type": "string",
                     "description": "The email address of the user that completed the checklist step.",
                     "x-ms-summary": "Completed By",
+                    "x-ms-visibility": "important"
+                },
+                "due": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The date and time the checklist step was due.",
+                    "x-ms-summary": "Step Due Date",
                     "x-ms-visibility": "important"
                 },
                 "step": {
